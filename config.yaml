@@ -1,31 +1,15 @@
 ---
-port: 9099
+port: 8080
 routes:
-  - path: /private/v1/accounts/{account_id}
+  - path: /foo
     response: >-
       {
-        "id": 49414,
-        "actualTerminals": 1,
-        "rolloverHour": "01",
-        "clockoutHour": "01",
-        "dbName": "cafe",
-        "type": "DEMO",
-        "barred": 0
+        "id": 123,
+        "message": "foo"
       }
-  - path: /private/v1/site/{site_id}
+  - path: /bar
     response: >-
       {
-        "id": "923646b9-d121-406d-a7b3-4137050fff40",
-        "businessId": "923646b9-d121-406d-a7b3-4137050fff40",
-        "addressId": null,
-        "legacyId": 49414,
-        "name": "cafe",
-        "relativeId": 1,
-        "timezoneId": "Europe/London",
-        "currencyId": "GBP",
-        "locale": "",
-        "dateCreated": "2018-10-29T14:27:43Z",
-        "dateModified": "2018-10-29T14:27:43Z",
-        "dateDeleted": null,
-        "isDeleted": false
+        "id": 321,
+        "message": "bar"
       }

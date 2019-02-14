@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/davyj0nes/stub-server/config"
+	"github.com/davyj0nes/stubby/config"
 	"github.com/gorilla/mux"
 )
 
