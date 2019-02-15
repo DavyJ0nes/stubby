@@ -4,13 +4,16 @@ FROM golang:1.12rc1-stretch As Builder
 ENV GO111MODULE=on
 WORKDIR /go/src/github.com/davyj0nes/stubby
 
+# Set up dependencies
 COPY ./go.mod go.mod
 COPY ./go.sum go.sum
 RUN go mod vendor
 
+# Copy rest of the package code
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo --installsuffix netgo -o stubby .
+# Build the statically linked binary
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo --installsuffix netgo -o stubby cmd/main.go
 
 # -- Main Image
 FROM alpine:3.9

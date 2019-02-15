@@ -1,15 +1,15 @@
 ---
-port: 8080
 routes:
   - path: /foo
+    status: 200
     response: >-
       {
         "id": 123,
         "message": "foo"
       }
-  - path: /bar
+  - path: /auth
+    status: 401
     response: >-
       {
-        "id": 321,
-        "message": "bar"
+        "message": "unauthorized"
       }

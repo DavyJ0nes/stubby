@@ -1,24 +1,20 @@
 package config
 
-import "github.com/spf13/viper"
-
-type Route struct {
-	Path     string
-	Response string
-}
+import (
+	"github.com/davyj0nes/stubby"
+	"github.com/spf13/viper"
+)
 
 type Config struct {
-	Port   string
-	Routes []Route
+	Routes []stubby.Route
 }
 
 func LoadConfig(fileName string) (Config, error) {
 	var cfg Config
+
 	v := viper.New()
 	v.SetConfigType("yaml")
-	v.SetConfigName(fileName)
-	v.AddConfigPath("./")
-	v.AutomaticEnv()
+	v.SetConfigFile(fileName)
 
 	err := v.ReadInConfig()
 	if err != nil {
