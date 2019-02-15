@@ -1,22 +1,22 @@
 # -- Builder Image
-FROM golang:1.11.4-alpine3.8 As Builder
+FROM golang:1.12rc1-stretch As Builder
 
-RUN apk update && \
-    apk add curl ca-certificates git && \
-    curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-
+ENV GO111MODULE=on
 WORKDIR /go/src/github.com/davyj0nes/stubby
 
-COPY ./Gopkg.toml Gopkg.toml
-COPY ./Gopkg.lock Gopkg.lock
-RUN dep ensure -vendor-only
+# Set up dependencies
+COPY ./go.mod go.mod
+COPY ./go.sum go.sum
+RUN go mod vendor
 
+# Copy rest of the package code
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo --installsuffix netgo -o stubby .
+# Build the statically linked binary
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo --installsuffix netgo -o stubby cmd/main.go
 
 # -- Main Image
-FROM alpine:3.8
+FROM alpine:3.9
 
 LABEL MAINTAINER=DavyJ0nes
 LABEL OWNER=DavyJ0nes
