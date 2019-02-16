@@ -1,4 +1,4 @@
-package server
+package router
 
 import (
 	"fmt"
@@ -9,7 +9,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func NewServer(routes []stubby.Route) *mux.Router {
+// NewRouter creates a router with the desired routes attached
+func NewRouter(routes []stubby.Route) *mux.Router {
 	r := mux.NewRouter()
 
 	for _, route := range routes {
@@ -24,11 +25,13 @@ func NewServer(routes []stubby.Route) *mux.Router {
 	return r
 }
 
+// Handler describes an HTTP handler with set response and status code
 type Handler struct {
 	Response string
 	Status   int
 }
 
+// ServeHTTP is used to adhere to the http.Handler interface
 func (h Handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	log.Printf("received (%s) request to %s", req.Method, req.URL.String())
 

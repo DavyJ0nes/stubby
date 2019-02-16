@@ -33,20 +33,33 @@ binary:
 image:
 	$(call blue, "# Building Docker Image...")
 	@docker build --label APP_VERSION=${VERSION} --label BUILT_ON=${BUILD_TIME} --label GIT_HASH=${COMMIT} -t ${USERNAME}/${APP_NAME}:${VERSION} .
+	@docker tag ${USERNAME}/${APP_NAME}:${VERSION} ${USERNAME}/${APP_NAME}:${COMMIT}
 	@docker tag ${USERNAME}/${APP_NAME}:${VERSION} ${USERNAME}/${APP_NAME}:latest
 	@$(MAKE) clean
 
 ## publish: pushes the tagged docker image to docker hub
 .PHONY: publish
-publish: image
+publish:
 	$(call blue, "# Publishing Docker Image...")
 	@docker push docker.io/${USERNAME}/${APP_NAME}:${VERSION}
+	@docker push docker.io/${USERNAME}/${APP_NAME}:${COMMIT}
+	@docker push docker.io/${USERNAME}/${APP_NAME}:latest
 
 ## run_image: builds and runs the docker image locally
 .PHONY: run_image
 run_image:
 	$(call blue, "# Running Docker Image Locally...")
 	@docker run -it --rm --name ${APP_NAME} -v ${PWD}/config.yaml:/config.yaml -p ${LOCAL_PORT}:${APP_PORT} ${USERNAME}/${APP_NAME}:${VERSION}
+
+## test: run test suites
+.PHONY: test
+test:
+	@go test -race ./... || (echo "go test failed $$?"; exit 1)
+
+## lint: run golint on project
+.PHONY: lint
+lint:
+	@golint -set_exit_status $(shell find . -type d | grep -v "vendor" | grep -v ".git" | grep -v ".idea")
 
 ## clean: remove binary from non release directory
 .PHONY: clean

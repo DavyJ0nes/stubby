@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/davyj0nes/stubby/config"
-	"github.com/davyj0nes/stubby/server"
+	"github.com/davyj0nes/stubby/router"
 )
 
 func main() {
@@ -18,9 +18,9 @@ func main() {
 		panic(err)
 	}
 
-	srv := server.NewServer(cfg.Routes)
+	r := router.NewRouter(cfg.Routes)
 	addr := ":8080"
 
 	log.Println("starting server on ", addr)
-	log.Fatal(http.ListenAndServe(addr, srv))
+	log.Fatal(http.ListenAndServe(addr, r))
 }

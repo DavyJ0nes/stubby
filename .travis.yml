@@ -1,0 +1,27 @@
+language: go
+
+services:
+  - docker
+
+go:
+  - '1.11.5'
+
+env:
+  - GO111MODULE=on
+
+before_install:
+  - go get -u golang.org/x/lint/golint
+
+install:
+  - go mod vendor
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+
+script:
+  - make lint
+  - make test
+  - make image
+
+deploy:
+  provider: script
+  skip_cleanup: true
+  script: make publish
