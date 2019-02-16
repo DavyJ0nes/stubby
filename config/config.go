@@ -5,10 +5,13 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Config is used to marshall a configuration file into something
+// more useful
 type Config struct {
 	Routes []stubby.Route
 }
 
+// LoadConfig from a file
 func LoadConfig(fileName string) (Config, error) {
 	var cfg Config
 
