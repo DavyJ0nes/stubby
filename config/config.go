@@ -8,6 +8,7 @@ import (
 // Config is used to marshall a configuration file into something
 // more useful
 type Config struct {
+	Port   int
 	Routes []stubby.Route
 }
 
