@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -19,7 +20,7 @@ func main() {
 	}
 
 	r := router.NewRouter(cfg.Routes)
-	addr := ":8080"
+	addr := fmt.Sprintf(":%d", cfg.Port)
 
 	log.Println("starting server on ", addr)
 	log.Fatal(http.ListenAndServe(addr, r))
