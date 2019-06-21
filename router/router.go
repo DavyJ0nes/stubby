@@ -19,7 +19,10 @@ func NewRouter(routes []stubby.Route) *mux.Router {
 			Status:   checkStatus(route.Status),
 		}
 
-		r.Handle(route.Path, &h)
+		r.NewRoute().
+			Path(route.Path).
+			Queries(route.Queries...).
+			Handler(&h)
 	}
 
 	return r

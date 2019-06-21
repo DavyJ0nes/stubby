@@ -8,6 +8,16 @@ routes:
         "id": 123,
         "message": "foo"
       }
+  - path: /foo
+    queries:
+      - show_deleted
+      - true
+    status: 200
+    respose: >-
+      {
+        "id": 987,
+        "message": "bar"
+      }
   - path: /auth
     status: 401
     response: >-
