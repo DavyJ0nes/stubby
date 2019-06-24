@@ -9,7 +9,7 @@ APP_NAME = stubby
 APP_PORT = 8080
 LOCAL_PORT = 8080
 
-VERSION = 0.2.0
+VERSION = $(shell git describe --exact-match --tags 2>/dev/null)
 COMMIT = $(shell git rev-parse HEAD | cut -c 1-6)
 BUILD_TIME = $(shell date -u '+%Y-%m-%d_%I:%M:%S%p')
 

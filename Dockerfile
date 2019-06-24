@@ -8,7 +8,7 @@ ARG APP_NAME=stubby
 ARG MAIN_PATH=cmd/main.go
 
 # -- Builder Image
-FROM golang:1.12rc1-stretch As Builder
+FROM golang:1.12.6-stretch As Builder
 
 ARG ORG_NAME
 ARG REPO_NAME
@@ -32,7 +32,7 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo --installsuffix netgo -o $APP_NAME $MAIN_PATH
 
 # -- Main Image
-FROM alpine:3.9
+FROM alpine:3.10
 
 ARG ORG_NAME
 ARG REPO_NAME
