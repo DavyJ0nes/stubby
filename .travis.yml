@@ -14,7 +14,6 @@ before_install:
 
 install:
   - go mod vendor
-  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 
 script:
   - make lint
@@ -24,6 +23,7 @@ deploy:
   provider: script
   skip_cleanup: true
   script:
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
     - make image
     - make publish
   on:
