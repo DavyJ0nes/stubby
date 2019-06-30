@@ -18,13 +18,3 @@ install:
 script:
   - make lint
   - make test
-
-deploy:
-  provider: script
-  skip_cleanup: true
-  script:
-    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-    - make image
-    - make publish
-  on:
-    tags: true
