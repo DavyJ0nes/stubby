@@ -59,6 +59,21 @@ func TestNewRouter(t *testing.T) {
 				status: http.StatusOK,
 			},
 		},
+		{
+			name: "supplied route with query params matches the right handler",
+			path: "/things?with_some_param=foo",
+			routes: []stubby.Route{
+				{
+					Path:     "/things",
+					Queries:  []string{"with_some_param", "foo"},
+					Response: "stuff",
+				},
+			},
+			want: expected{
+				body:   "stuff",
+				status: http.StatusOK,
+			},
+		},
 	}
 
 	for _, tt := range tests {
