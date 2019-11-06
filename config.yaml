@@ -1,5 +1,5 @@
 ---
-port: 8888
+port: 8080
 routes:
   - path: /foo
     status: 200
@@ -13,7 +13,7 @@ routes:
       - show_deleted
       - true
     status: 200
-    respose: >-
+    response: >-
       {
         "id": 987,
         "message": "bar"
@@ -23,4 +23,14 @@ routes:
     response: >-
       {
         "message": "unauthorized"
+      }
+  - path: /withResponseHeaders
+    headers:
+      X-Request-Id: ef835eaf-a658-458b-86ae-d2d771f5e745
+      CustomHeader: booyah
+    status: 200
+    response: >-
+      {
+        "id": 123,
+        "message": "booyah"
       }

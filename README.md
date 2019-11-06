@@ -22,6 +22,8 @@ Return stubbed HTTP responses defined in a config file
 
 ### Configuration
 
+### Basic
+
 Add the routes and the responses that you want in the [config file](./comfig.yaml).
 
 A basic route definition would look like:
@@ -36,6 +38,8 @@ routes:
         "message": "foo"
       }
 ```
+
+### URL Query Params
 
 If the response has URL parameters then these need to be defined as follows:
 
@@ -56,6 +60,24 @@ routes:
 The reason for having them defined in a list rather than as a key/value pair
 is due to how the (Queries](https://www.gorillatoolkit.org/pkg/mux#Route.Queries)
 method is defined in the router package used ([gorilla mux](https://www.gorillatoolkit.org)).
+
+### Custom Response Headers
+
+If you want the response to include a header then you can add it as such:
+
+```yaml
+routes:
+  - path: /foo
+    status: 200
+    headers:
+      X-Custom: Header
+      X-Request-Id: ef835eaf-a658-458b-86ae-d2d771f5e745
+    respose: >-
+      {
+        "id": 987,
+        "message": "bar"
+      }
+```
 
 ### Docker
 

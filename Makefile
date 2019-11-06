@@ -6,12 +6,12 @@ all: help
 USERNAME = davyj0nes
 APP_NAME = stubby
 
-APP_PORT = 8080
-LOCAL_PORT = 8080
-
 VERSION = $(shell git describe --exact-match --tags 2>/dev/null)
 COMMIT = $(shell git rev-parse HEAD | cut -c 1-6)
 BUILD_TIME = $(shell date -u '+%Y-%m-%d_%I:%M:%S%p')
+
+APP_PORT = 8080
+LOCAL_PORT = 8080
 
 BUILD_PREFIX = CGO_ENABLED=0 GOOS=linux
 BUILD_FLAGS = -a -tags netgo --installsuffix netgo
@@ -49,7 +49,7 @@ publish:
 .PHONY: run_image
 run_image:
 	$(call blue, "# Running Docker Image Locally...")
-	@docker run -it --rm --name ${APP_NAME} -v ${PWD}/config.yaml:/config.yaml -p ${LOCAL_PORT}:${APP_PORT} ${USERNAME}/${APP_NAME}:${VERSION}
+	@docker run -it --rm --name ${APP_NAME} -v ${PWD}/config.yaml:/config.yaml -p ${LOCAL_PORT}:${APP_PORT} ${USERNAME}/${APP_NAME}
 
 ## test: run test suites
 .PHONY: test

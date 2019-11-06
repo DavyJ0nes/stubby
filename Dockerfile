@@ -8,7 +8,7 @@ ARG APP_NAME=stubby
 ARG MAIN_PATH=cmd/main.go
 
 # -- Builder Image
-FROM golang:1.12.6-stretch As Builder
+FROM golang:1.13-stretch As Builder
 
 ARG ORG_NAME
 ARG REPO_NAME
@@ -23,7 +23,7 @@ WORKDIR /go/src/github.com/${ORG_NAME}/${REPO_NAME}
 # Set up dependencies
  COPY ./go.mod go.mod
  COPY ./go.sum go.sum
- RUN go mod vendor
+ RUN go mod download
 
 # Copy rest of the package code
 COPY . .
