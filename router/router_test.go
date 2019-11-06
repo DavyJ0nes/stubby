@@ -10,9 +10,15 @@ import (
 	"github.com/davyj0nes/stubby/router"
 )
 
+type customHeader struct {
+	Key   string
+	Value string
+}
+
 type expected struct {
-	body   string
-	status int
+	body         string
+	customHeader customHeader
+	status       int
 }
 
 func TestNewRouter(t *testing.T) {
@@ -74,6 +80,22 @@ func TestNewRouter(t *testing.T) {
 				status: http.StatusOK,
 			},
 		},
+		{
+			name: "supplied route with headers matches the right handler",
+			path: "/head",
+			routes: []stubby.Route{
+				{
+					Path:     "/head",
+					Headers:  map[string]string{"Custom": "custom"},
+					Response: "at the head",
+				},
+			},
+			want: expected{
+				body:         "at the head",
+				status:       http.StatusOK,
+				customHeader: customHeader{Key: "Custom", Value: "custom"},
+			},
+		},
 	}
 
 	for _, tt := range tests {
@@ -91,8 +113,12 @@ func TestNewRouter(t *testing.T) {
 				t.Errorf("expected: (%d), got: (%d)", tt.want.status, res.StatusCode)
 			}
 
-			body := getResponseBody(t, res)
+			headerVal := getResponseHeader(t, res, tt.want.customHeader.Key)
+			if headerVal != tt.want.customHeader.Value {
+				t.Errorf("expected: (%s), got: (%s)", tt.want.customHeader.Value, headerVal)
+			}
 
+			body := getResponseBody(t, res)
 			if body != tt.want.body {
 				t.Errorf("expected: (%s), got: (%s)", tt.want.body, body)
 			}
@@ -109,4 +135,10 @@ func getResponseBody(t *testing.T, r *http.Response) string {
 	}
 
 	return string(body)
+}
+
+func getResponseHeader(t *testing.T, r *http.Response, wantHeader string) string {
+	t.Helper()
+
+	return r.Header.Get(wantHeader)
 }

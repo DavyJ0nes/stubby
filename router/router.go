@@ -1,7 +1,6 @@
 package router
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
@@ -17,6 +16,7 @@ func NewRouter(routes []stubby.Route) *mux.Router {
 		h := Handler{
 			Response: route.Response,
 			Status:   checkStatus(route.Status),
+			Headers:  route.Headers,
 		}
 
 		r.NewRoute().
@@ -32,16 +32,25 @@ func NewRouter(routes []stubby.Route) *mux.Router {
 type Handler struct {
 	Response string
 	Status   int
+	Headers  map[string]string
 }
 
 // ServeHTTP is used to adhere to the http.Handler interface
 func (h Handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	log.Printf("received (%s) request to %s", req.Method, req.URL.String())
 
+	for k, v := range h.Headers {
+		w.Header().Add(k, v)
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(h.Status)
 
-	fmt.Fprintf(w, h.Response)
+	_, err := w.Write([]byte(h.Response))
+	if err != nil {
+		log.Printf("err writing response: %s", err)
+	}
+
 }
 
 func checkStatus(status int) int {
