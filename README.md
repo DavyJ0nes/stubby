@@ -6,11 +6,14 @@
 
 <!-- vim-markdown-toc Redcarpet -->
 
-* [Description](#description)
-* [Usage](#usage)
-  * [Configuration](#configuration)
-  * [Docker](#docker)
-* [License](#license)
+- [Description](#description)
+- [Usage](#usage)
+  - [Configuration](#configuration)
+  - [Basic](#basic)
+  - [URL Query Params](#url-query-params)
+  - [Custom Response Headers](#custom-response-headers)
+  - [Docker](#docker)
+- [License](#license)
 
 <!-- vim-markdown-toc -->
 
@@ -101,4 +104,4 @@ docker run --rm -v "$PWD/config.yaml:/bin/config.yaml" -p 8080:8080 davyj0nes/st
 
 ## License
 
-MIT
+[MIT](./LICENSE)
