@@ -96,6 +96,20 @@ func TestNewRouter(t *testing.T) {
 				customHeader: customHeader{Key: "Custom", Value: "custom"},
 			},
 		},
+		{
+			name: "supplied route with parameterised path value matches correct route",
+			path: "/wildcard/test",
+			routes: []stubby.Route{
+				{
+					Path:     "/wildcard/{wildcard}",
+					Response: "wildcard response",
+				},
+			},
+			want: expected{
+				body:         "wildcard response",
+				status:       http.StatusOK,
+			},
+		},
 	}
 
 	for _, tt := range tests {
