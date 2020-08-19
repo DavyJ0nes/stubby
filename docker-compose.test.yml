@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+    stubby:
+        build: .
+        ports:
+            - 8080:8080
+        volumes:
+            - ./testing/integration.yaml:/config.yaml
+
+    sut:
+        image: golang:1.14
+        depends_on:
+            - stubby
+        
+        working_dir: /app
+        volumes:
+            - ./:/app
+        
+        environment:
+            - STUBBY_ADDR=http://stubby:8080
+        command: > 
+            sh -c "echo '... starting integration tests ...\n' &&
+            go test -v -race ./testing/ --tags=integration &&
+            echo '\n... completed integration tests ...'"
