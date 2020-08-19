@@ -13,6 +13,7 @@ import (
 
 	"github.com/davyj0nes/stubby/config"
 	"github.com/davyj0nes/stubby/router"
+	"github.com/gorilla/mux"
 )
 
 func main() {
@@ -21,7 +22,7 @@ func main() {
 
 	cfg, err := config.LoadConfig(*configFile)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	r := router.NewRouter(cfg.Routes)
@@ -43,7 +44,11 @@ func main() {
 
 	}()
 
-	log.Print("stubby is ready to serve...")
+	log.Println("stubby is ready to serve...")
+	log.Println("routes configured for stubby are:")
+	if err := r.Walk(outputRouteInfo); err != nil {
+		log.Fatal(err)
+	}
 
 	killSignal := <-interrupt
 	switch killSignal {
@@ -56,4 +61,23 @@ func main() {
 	}
 
 	log.Fatal(srv.Shutdown(context.Background()))
+}
+
+func outputRouteInfo(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
+	path, err := route.GetPathTemplate()
+	if err != nil {
+		return err
+	}
+	queries, err := route.GetQueriesTemplates()
+	if err != nil {
+		return err
+	}
+	log.Println("path: " + path)
+	if len(queries) != 0 {
+		log.Println("queries:")
+		for _, query := range queries {
+			log.Println("  - " + query)
+		}
+	}
+	return nil
 }

@@ -1,0 +1,34 @@
+---
+port: 8080
+routes:
+  - path: /basic
+    status: 200
+    response: >-
+      {
+        "message": "foo"
+      }
+  - path: /auth
+    status: 401
+    response: >-
+      {
+        "message": "unauthorized"
+      }
+  - path: /query-params
+    queries:
+      - query
+      - blah
+    status: 200
+    response: >-
+      {
+        "bar": "42"
+      }
+  - path: /withResponseHeaders
+    headers:
+      X-Request-Id: ef835eaf-a658-458b-86ae-d2d771f5e745
+      CustomHeader: westCoastCustoms
+    status: 200
+    response: >-
+      {
+        "id": 123,
+        "message": "booyah"
+      }

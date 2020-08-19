@@ -106,8 +106,8 @@ func TestNewRouter(t *testing.T) {
 				},
 			},
 			want: expected{
-				body:         "wildcard response",
-				status:       http.StatusOK,
+				body:   "wildcard response",
+				status: http.StatusOK,
 			},
 		},
 	}

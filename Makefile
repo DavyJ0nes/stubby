@@ -51,15 +51,26 @@ run_image:
 	$(call blue, "# Running Docker Image Locally...")
 	@docker run -it --rm --name ${APP_NAME} -v ${PWD}/config.yaml:/config.yaml -p ${LOCAL_PORT}:${APP_PORT} ${USERNAME}/${APP_NAME}
 
-## test: run test suites
-.PHONY: test
-test:
-	@go test -race ./... || (echo "go test failed $$?"; exit 1)
-
 ## lint: run golint on project
 .PHONY: lint
 lint:
-	@golint -set_exit_status $(shell find . -type d | grep -v "vendor" | grep -v ".git" | grep -v ".idea")
+	@docker run --rm -v ${PWD}:/app -w /app golangci/golangci-lint:v1.30.0 golangci-lint run
+
+## test: alias for test
+.PHONY: test
+test: unittest
+
+## unittest: run unit test suites
+.PHONY: unittest
+unittest:
+	@go test -v -race ./...
+
+## integrationtest: run integration test suites
+.PHONY: integrationtest
+integrationtest:
+	@docker-compose --file docker-compose.test.yml build
+	@docker-compose --file docker-compose.test.yml run sut
+	@docker-compose --file docker-compose.test.yml down
 
 ## clean: remove binary from non release directory
 .PHONY: clean
