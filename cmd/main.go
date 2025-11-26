@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"log"
@@ -28,20 +29,22 @@ func main() {
 	r := router.NewRouter(cfg.Routes)
 	addr := fmt.Sprintf(":%d", cfg.Port)
 
-	srv := http.Server{
+	srv := &http.Server{
 		Addr:         addr,
 		Handler:      r,
 		ReadTimeout:  1 * time.Second,
 		WriteTimeout: 5 * time.Second,
+		IdleTimeout:  60 * time.Second,
 	}
 
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
 
-	log.Println("starting stubby on ", addr)
+	log.Println("starting stubby on", addr)
 	go func() {
-		log.Fatal(srv.ListenAndServe())
-
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Fatalf("listen failed: %v", err)
+		}
 	}()
 
 	log.Println("stubby is ready to serve...")
@@ -51,16 +54,13 @@ func main() {
 	}
 
 	killSignal := <-interrupt
-	switch killSignal {
-	case os.Interrupt:
-		log.Println("got SIGINT...")
-		log.Println("stubby is shutting down...")
-	case syscall.SIGTERM:
-		log.Println("got SIGTERM...")
-		log.Println("stubby is shutting down...")
-	}
+	log.Printf("got %s, shutting down...", killSignal)
 
-	log.Fatal(srv.Shutdown(context.Background()))
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Printf("graceful shutdown failed: %v", err)
+	}
 }
 
 func outputRouteInfo(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
