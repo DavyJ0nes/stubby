@@ -1,15 +1,14 @@
 package router
 
 import (
-	"log"
+	"log/slog"
 	"net/http"
 
-	"github.com/davyj0nes/stubby"
 	"github.com/gorilla/mux"
 )
 
 // NewRouter creates a router with the desired routes attached
-func NewRouter(routes []stubby.Route) *mux.Router {
+func NewRouter(routes []Route) *mux.Router {
 	r := mux.NewRouter()
 
 	for _, route := range routes {
@@ -37,7 +36,8 @@ type Handler struct {
 
 // ServeHTTP is used to adhere to the http.Handler interface
 func (h Handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	log.Printf("received (%s) request to %s", req.Method, req.URL.String())
+	//nolint:gosec // values are JSON-encoded by slog's handler; injection is not a risk
+	slog.Info("request received", "method", req.Method, "path", req.URL.Path, "query", req.URL.RawQuery)
 
 	for k, v := range h.Headers {
 		w.Header().Add(k, v)
@@ -46,11 +46,9 @@ func (h Handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(h.Status)
 
-	_, err := w.Write([]byte(h.Response))
-	if err != nil {
-		log.Printf("err writing response: %s", err)
+	if _, err := w.Write([]byte(h.Response)); err != nil {
+		slog.Error("failed to write response", "error", err)
 	}
-
 }
 
 func checkStatus(status int) int {

@@ -1,14 +1,15 @@
 package router_test
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/davyj0nes/stubby"
-	"github.com/davyj0nes/stubby/router"
+	"github.com/davyj0nes/stubby/internal/router"
 )
+
+var httpClient = &http.Client{}
 
 type customHeader struct {
 	Key   string
@@ -25,7 +26,7 @@ func TestNewRouter(t *testing.T) {
 	tests := []struct {
 		name   string
 		path   string
-		routes []stubby.Route
+		routes []router.Route
 		want   expected
 	}{
 		{
@@ -39,7 +40,7 @@ func TestNewRouter(t *testing.T) {
 		{
 			name: "supplied route give expected response",
 			path: "/hey",
-			routes: []stubby.Route{
+			routes: []router.Route{
 				{
 					Path:     "/hey",
 					Response: "Yo, Yo, Yo",
@@ -54,7 +55,7 @@ func TestNewRouter(t *testing.T) {
 		{
 			name: "supplied route without status still give expected response",
 			path: "/salut",
-			routes: []stubby.Route{
+			routes: []router.Route{
 				{
 					Path:     "/salut",
 					Response: "Yo, Yo, Yo",
@@ -68,7 +69,7 @@ func TestNewRouter(t *testing.T) {
 		{
 			name: "supplied route with query params matches the right handler",
 			path: "/things?with_some_param=foo",
-			routes: []stubby.Route{
+			routes: []router.Route{
 				{
 					Path:     "/things",
 					Queries:  []string{"with_some_param", "foo"},
@@ -83,7 +84,7 @@ func TestNewRouter(t *testing.T) {
 		{
 			name: "supplied route with headers matches the right handler",
 			path: "/head",
-			routes: []stubby.Route{
+			routes: []router.Route{
 				{
 					Path:     "/head",
 					Headers:  map[string]string{"Custom": "custom"},
@@ -99,7 +100,7 @@ func TestNewRouter(t *testing.T) {
 		{
 			name: "supplied route with parameterised path value matches correct route",
 			path: "/wildcard/test",
-			routes: []stubby.Route{
+			routes: []router.Route{
 				{
 					Path:     "/wildcard/{wildcard}",
 					Response: "wildcard response",
@@ -118,10 +119,15 @@ func TestNewRouter(t *testing.T) {
 			ts := httptest.NewServer(r)
 			defer ts.Close()
 
-			res, err := http.Get(ts.URL + tt.path)
+			req, err := http.NewRequestWithContext(t.Context(), http.MethodGet, ts.URL+tt.path, nil)
 			if err != nil {
 				t.Fatal(err)
 			}
+			res, err := httpClient.Do(req)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer res.Body.Close()
 
 			if res.StatusCode != tt.want.status {
 				t.Errorf("expected: (%d), got: (%d)", tt.want.status, res.StatusCode)
@@ -143,7 +149,7 @@ func TestNewRouter(t *testing.T) {
 func getResponseBody(t *testing.T, r *http.Response) string {
 	t.Helper()
 
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		t.Fatal(err)
 	}

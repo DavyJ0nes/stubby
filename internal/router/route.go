@@ -1,4 +1,4 @@
-package stubby
+package router
 
 // Route describes a configurable stub route
 type Route struct {

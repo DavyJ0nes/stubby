@@ -5,25 +5,29 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
-	"github.com/davyj0nes/stubby/config"
-	"github.com/davyj0nes/stubby/router"
+	"github.com/davyj0nes/stubby/internal/config"
+	"github.com/davyj0nes/stubby/internal/router"
 	"github.com/gorilla/mux"
 )
 
 func main() {
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	slog.SetDefault(logger)
+
 	configFile := flag.String("config", "config.yaml", "config file to use")
 	flag.Parse()
 
 	cfg, err := config.LoadConfig(*configFile)
 	if err != nil {
-		log.Fatal(err)
+		slog.Error("failed to load config", "error", err)
+		os.Exit(1)
 	}
 
 	r := router.NewRouter(cfg.Routes)
@@ -40,30 +44,31 @@ func main() {
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
 
-	log.Println("starting stubby on", addr)
+	slog.Info("starting stubby", "addr", addr)
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Fatalf("listen failed: %v", err)
+			slog.Error("listen failed", "error", err)
+			os.Exit(1)
 		}
 	}()
 
-	log.Println("stubby is ready to serve...")
-	log.Println("routes configured for stubby are:")
+	slog.Info("stubby is ready to serve")
 	if err := r.Walk(outputRouteInfo); err != nil {
-		log.Fatal(err)
+		slog.Error("failed to walk routes", "error", err)
+		os.Exit(1)
 	}
 
 	killSignal := <-interrupt
-	log.Printf("got %s, shutting down...", killSignal)
+	slog.Info("shutting down", "signal", killSignal.String())
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
-		log.Printf("graceful shutdown failed: %v", err)
+		slog.Error("graceful shutdown failed", "error", err)
 	}
 }
 
-func outputRouteInfo(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
+func outputRouteInfo(route *mux.Route, _ *mux.Router, _ []*mux.Route) error {
 	path, err := route.GetPathTemplate()
 	if err != nil {
 		return err
@@ -72,12 +77,10 @@ func outputRouteInfo(route *mux.Route, router *mux.Router, ancestors []*mux.Rout
 	if err != nil {
 		return err
 	}
-	log.Println("path: " + path)
-	if len(queries) != 0 {
-		log.Println("queries:")
-		for _, query := range queries {
-			log.Println("  - " + query)
-		}
+	if len(queries) > 0 {
+		slog.Info("route configured", "path", path, "queries", queries)
+	} else {
+		slog.Info("route configured", "path", path)
 	}
 	return nil
 }
