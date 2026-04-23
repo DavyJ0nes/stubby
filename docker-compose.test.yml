@@ -1,15 +1,14 @@
-version: '3'
-
 services:
     stubby:
         build: .
+        command: ["-config", "/config.yaml"]
         ports:
             - 8080:8080
         volumes:
             - ./testing/integration.yaml:/config.yaml
 
     sut:
-        image: golang:1.14
+        image: golang:1.26
         depends_on:
             - stubby
         
@@ -19,7 +18,9 @@ services:
         
         environment:
             - STUBBY_ADDR=http://stubby:8080
-        command: > 
-            sh -c "echo '... starting integration tests ...\n' &&
+        command: >
+            bash -c "
+            until printf '' 2>/dev/null >/dev/tcp/stubby/8080; do echo 'waiting for stubby...'; sleep 1; done &&
+            echo '... starting integration tests ...' &&
             go test -v -race ./testing/ --tags=integration &&
-            echo '\n... completed integration tests ...'"
+            echo '... completed integration tests ...'"

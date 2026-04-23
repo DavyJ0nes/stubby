@@ -1,15 +1,14 @@
 package config
 
 import (
-	"github.com/davyj0nes/stubby"
+	"github.com/davyj0nes/stubby/internal/router"
 	"github.com/spf13/viper"
 )
 
-// Config is used to marshall a configuration file into something
-// more useful
+// Config is used to marshal a configuration file into something more useful
 type Config struct {
 	Port   int
-	Routes []stubby.Route
+	Routes []router.Route
 }
 
 // LoadConfig from a file
@@ -25,10 +24,9 @@ func LoadConfig(fileName string) (Config, error) {
 		return cfg, err
 	}
 
-	err = v.Unmarshal(&cfg)
-	if err != nil {
+	if err = v.Unmarshal(&cfg); err != nil {
 		return cfg, err
 	}
 
-	return cfg, err
+	return cfg, nil
 }
